@@ -22,6 +22,6 @@ fn missing_file() {
 fn fail() {
     assert_cli!(
         LINK_CHECKER, &["tests/fixtures/fail.html"] =>
-        Error 1, "Missing links: {\n    \"missing-link\"\n}"
+        Error 1, "Missing links: [\"missing-link\"]"
     ).unwrap();
 }

@@ -12,13 +12,14 @@
 #![cfg_attr(feature = "dev", feature(plugin))]
 #![cfg_attr(feature = "dev", plugin(clippy))]
 
-extern crate regex;
-#[macro_use]
-extern crate quick_error;
+#[macro_use] extern crate quick_error;
+
+extern crate tendril;
+extern crate html5ever;
 
 use std::env;
 use std::fs::File;
-use std::io::{stderr, Read, Write};
+use std::io::{stderr, Write};
 use std::process::exit;
 
 mod errors;
@@ -28,10 +29,7 @@ use errors::LinkCheckerError;
 
 fn handle_main(path: &str) -> Result<(), LinkCheckerError> {
     let mut file = try!(File::open(path));
-    let mut buffer = String::new();
-    try!(file.read_to_string(&mut buffer));
-
-    lint::lint_html_links(&buffer).map_err(errors::LinkCheckerError::MissingLinks)
+    lint::lint_html_links(&mut file)
 }
 
 fn main() {

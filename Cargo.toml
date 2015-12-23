@@ -4,8 +4,9 @@ name = "anchor-link-checker"
 version = "0.1.0"
 
 [dependencies]
+html5ever = "0.2.11"
 quick-error = "0.1.4"
-regex = "0.1.41"
+tendril = "0.1.6"
 
 [dependencies.clippy]
 optional = true

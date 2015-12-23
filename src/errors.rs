@@ -1,5 +1,6 @@
 use std::io;
 use std::collections::HashSet;
+use tendril::StrTendril;
 
 quick_error! {
     #[derive(Debug)]
@@ -10,9 +11,17 @@ quick_error! {
             description(err.description())
             display("Couldn't read file")
         }
-        MissingLinks(links: HashSet<String>) {
+        Read {
+            from()
+            description("Error reading file to tendril string.")
+        }
+        MissingLinks(links: HashSet<StrTendril>) {
             description("Missing links")
-            display("Missing links: {:#?}", links)
+            display("Missing links: [{}]",
+                links.iter()
+                    .map(|key| format!("\"{}\"", key))
+                    .collect::<Vec<_>>().join(", ")
+            )
         }
     }
 }
