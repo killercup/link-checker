@@ -16,6 +16,7 @@
 
 extern crate tendril;
 extern crate html5ever;
+extern crate hyper;
 
 use std::env;
 use std::fs::File;
@@ -23,13 +24,24 @@ use std::io::{stderr, Write};
 use std::process::exit;
 
 mod errors;
-mod lint;
+mod links;
 
 use errors::LinkCheckerError;
 
-fn handle_main(path: &str) -> Result<(), LinkCheckerError> {
+fn handle_main(path: &str) -> Result<Vec<(String, hyper::status::StatusCode)>, LinkCheckerError> {
     let mut file = try!(File::open(path));
-    lint::lint_html_links(&mut file)
+    let links = try!(links::collect_from_html(&mut file));
+
+    try!(links.check_missing_anchors());
+
+    links.get_external_links().iter()
+         .map(|url| {
+            let url = &url[..];
+            hyper::Client::new().head(url).send()
+                                .map(|res| (url.to_owned(), res.status))
+                                .map_err(|err| LinkCheckerError::Http(url.to_owned(), err))
+         })
+         .collect()
 }
 
 fn main() {

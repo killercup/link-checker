@@ -1,10 +1,13 @@
 [package]
 authors = ["Pascal Hertleif <killercup@gmail.com>"]
-name = "anchor-link-checker"
+license = "MIT"
+name = "link-checker"
+readme = "README.md"
 version = "0.1.0"
 
 [dependencies]
 html5ever = "0.2.11"
+hyper = "0.7.1"
 quick-error = "0.1.4"
 tendril = "0.1.6"
 

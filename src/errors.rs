@@ -1,6 +1,7 @@
 use std::io;
 use std::collections::HashSet;
 use tendril::StrTendril;
+use hyper::error::Error as HyperError;
 
 quick_error! {
     #[derive(Debug)]
@@ -22,6 +23,12 @@ quick_error! {
                     .map(|key| format!("\"{}\"", key))
                     .collect::<Vec<_>>().join(", ")
             )
+        }
+        Http(url: String, err: HyperError) {
+            from(err)
+            cause(err)
+            description("Error fetching external link")
+            display("Error fetching external link `{}`: {}", url, err)
         }
     }
 }

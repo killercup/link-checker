@@ -7,10 +7,28 @@ use html5ever::tokenizer::{TokenSink, Token, Tokenizer, TokenizerOpts};
 use errors::LinkCheckerError;
 
 #[derive(Debug)]
-struct Links {
+pub struct Links {
     urls: HashSet<StrTendril>,
     anchors: HashSet<StrTendril>,
     ids: HashSet<StrTendril>,
+}
+
+impl Links {
+    pub fn check_missing_anchors(&self) -> Result<(), LinkCheckerError> {
+        if self.anchors.is_subset(&self.ids) {
+            Ok(())
+        } else {
+            Err(self.anchors
+                    .difference(&self.ids)
+                    .cloned()
+                    .collect::<HashSet<StrTendril>>())
+                .map_err(LinkCheckerError::MissingLinks)
+        }
+    }
+
+    pub fn get_external_links<'a>(&'a self) -> &'a HashSet<StrTendril> {
+        &self.urls
+    }
 }
 
 impl TokenSink for Links {
@@ -31,7 +49,7 @@ impl TokenSink for Links {
     }
 }
 
-pub fn lint_html_links<R: Read>(html: &mut R) -> Result<(), LinkCheckerError> {
+pub fn collect_from_html<R: Read>(html: &mut R) -> Result<Links, LinkCheckerError> {
     let mut input = ByteTendril::new();
     try!(html.read_to_tendril(&mut input));
     let input = try!(input.try_reinterpret().map_err(|_| LinkCheckerError::Read));
@@ -47,17 +65,6 @@ pub fn lint_html_links<R: Read>(html: &mut R) -> Result<(), LinkCheckerError> {
         tok.feed(s);
     }
     tok.end();
-    let sink = tok.unwrap();
 
-    // println!("{:#?}", sink);
-
-    if sink.anchors.is_subset(&sink.ids) {
-        Ok(())
-    } else {
-        Err(sink.anchors
-                .difference(&sink.ids)
-                .cloned()
-                .collect::<HashSet<StrTendril>>())
-            .map_err(LinkCheckerError::MissingLinks)
-    }
+    Ok(tok.unwrap())
 }
