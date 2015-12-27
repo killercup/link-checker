@@ -26,7 +26,7 @@ impl Links {
         }
     }
 
-    pub fn get_external_links<'a>(&'a self) -> &'a HashSet<StrTendril> {
+    pub fn get_external_links(&self) -> &HashSet<StrTendril> {
         &self.urls
     }
 }
